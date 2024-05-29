@@ -11,7 +11,7 @@ By Emmanuel Turlay, Staff Software Engineer at Cruise
 
 -   [User management](https://alx-intranet.hbtn.io/concepts/558)
 
-![](https://s3.amazonaws.com/alx-intranet.hbtn.io/uploads/medias/2019/12/5c48d4f6d4dd8081eb48.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIARDDGGGOUSBVO6H7D%2F20220721%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20220721T055115Z&X-Amz-Expires=86400&X-Amz-SignedHeaders=host&X-Amz-Signature=664bd64231f905664b6a384a5e542e1dd870712de41ea4f3383d563285559471)
+![5c48d4f6d4dd8081eb48](https://github.com/mohammedchakir/alx-backend-user-data/assets/129831433/3a986cfa-ffca-49a4-b5a9-0edd95caa1b6)
 
 ## Resources:
 
