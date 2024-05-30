@@ -1,81 +1,54 @@
 #!/usr/bin/env python3
 """
-This module provides a function to obfuscate specified fields in a log message,
-a RedactingFormatter class to format log records with obfuscated values,
-and a get_logger function to configure a logger with specific settings.
+Script for handling Personal Data
 """
 
-import os
+from typing import List
 import re
-from os import environ
 import logging
-from typing import List, Tuple
+from os import environ
 import mysql.connector
-from mysql.connector.connection import MySQLConnection
+
+
+# # PII fields to be redacted
+PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 
 
 def filter_datum(fields: List[str], redaction: str,
                  message: str, separator: str) -> str:
     """
-    Obfuscate specified fields in the log message.
+    Replaces sensitive information in a message with a redacted value
+    based on the list of fields to redact
 
-    :param fields: List of strings representing fields to obfuscate.
-    :param redaction: String representing the replacement text.
-    :param message: The log message.
-    :param separator: The field separator in the log message.
-    :return: The obfuscated log message.
+    Args:
+        fields: list of fields to redact
+        redaction: the value to use for redaction
+        message: the string message to filter
+        separator: the separator to use between fields
+
+    Returns:
+        The filtered string message with redacted values
     """
-    pattern = '|'.join(f'(?<={field}=)[^{separator}]+' for field in fields)
-    return re.sub(pattern, redaction, message)
-
-
-class RedactingFormatter(logging.Formatter):
-    """
-    Redacting Formatter class for filtering sensitive information from logs.
-    """
-
-    REDACTION = "***"
-    FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
-    SEPARATOR = ";"
-
-    def __init__(self, fields: List[str]):
-        """
-        Initialize the formatter with fields to redact.
-
-        :param fields: List of strings representing fields to obfuscate.
-        """
-        super(RedactingFormatter, self).__init__(self.FORMAT)
-        self.fields = fields
-
-    def format(self, record: logging.LogRecord) -> str:
-        """
-        Format the log record, obfuscating specified fields.
-
-        :param record: The log record to format.
-        :return: The formatted log record as a string.
-        """
-        record.msg = filter_datum(self.fields, self.REDACTION,
-                                  record.msg, self.SEPARATOR)
-        return super(RedactingFormatter, self).format(record)
-
-
-PII_FIELDS: Tuple[str, ...] = ("name", "email", "phone", "ssn", "password")
+    for f in fields:
+        message = re.sub(f'{f}=.*?{separator}',
+                         f'{f}={redaction}{separator}', message)
+    return message
 
 
 def get_logger() -> logging.Logger:
     """
-    Create and configure a logger named 'user_data' to log obfuscated messages.
+    Returns a Logger object for handling Personal Data
 
-    :return: Configured logger object.
+    Returns:
+        A Logger object with INFO log level and RedactingFormatter
+        formatter for filtering PII fields
     """
     logger = logging.getLogger("user_data")
     logger.setLevel(logging.INFO)
     logger.propagate = False
 
     stream_handler = logging.StreamHandler()
-    formatter = RedactingFormatter(fields=list(PII_FIELDS))
-    stream_handler.setFormatter(formatter)
-
+    stream_handler.setFormatter(RedactingFormatter(list(PII_FIELDS)))
     logger.addHandler(stream_handler)
 
     return logger
@@ -103,8 +76,7 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
 
 def main():
     """
-    Main function that retrieves all rows from the users table and
-    logs each row with sensitive fields obfuscated.
+    Main function to retrieve user data from database and log to console
     """
     db = get_db()
     cursor = db.cursor()
@@ -121,5 +93,35 @@ def main():
     db.close()
 
 
-if __name__ == "__main__":
+class RedactingFormatter(logging.Formatter):
+    """
+    Redacting Formatter class for filtering PII fields
+    """
+
+    REDACTION = "***"
+    FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
+    SEPARATOR = ";"
+
+    def __init__(self, fields: List[str]):
+        """
+        Constructor method for RedactingFormatter class
+
+        Args:
+            fields: list of fields to redact in log messages
+        """
+        super(RedactingFormatter, self).__init__(self.FORMAT)
+        self.fields = fields
+
+    def format(self, record: logging.LogRecord) -> str:
+        """
+        Formats the specified log record as text.
+
+        Filters values in incoming log records using filter_datum.
+        """
+        record.msg = filter_datum(self.fields, self.REDACTION,
+                                  record.getMessage(), self.SEPARATOR)
+        return super(RedactingFormatter, self).format(record)
+
+
+if __name__ == '__main__':
     main()
