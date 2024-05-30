@@ -5,6 +5,7 @@ a RedactingFormatter class to format log records with obfuscated values,
 and a get_logger function to configure a logger with specific settings.
 """
 
+import os
 import re
 from os import environ
 import logging
@@ -80,24 +81,24 @@ def get_logger() -> logging.Logger:
     return logger
 
 
-def get_db() -> mysql.connector.connection.MySQLConnection:
+def get_db() -> MySQLConnection:
     """
-    Connect to the MySQL database using credentials from environment variables.
+    Connect to a secure MySQL database using credentials from
+    environment variables.
 
-    :return: MySQLConnection object.
+    :return: A MySQLConnection object.
     """
-    username = environ.get('PERSONAL_DATA_DB_USERNAME', 'root')
-    password = environ.get('PERSONAL_DATA_DB_PASSWORD', '')
-    host = environ.get('PERSONAL_DATA_DB_HOST', 'localhost')
-    db_name = environ.get('PERSONAL_DATA_DB_NAME')
+    username = os.getenv('PERSONAL_DATA_DB_USERNAME', 'root')
+    password = os.getenv('PERSONAL_DATA_DB_PASSWORD', '')
+    host = os.getenv('PERSONAL_DATA_DB_HOST', 'localhost')
+    database = os.getenv('PERSONAL_DATA_DB_NAME')
 
-    connect = mysql.connector.connection.MySQLConnection(
+    return mysql.connector.connect(
         user=username,
         password=password,
         host=host,
-        database=db_name)
-
-    return connect
+        database=database
+    )
 
 
 def main():
