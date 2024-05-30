@@ -6,7 +6,7 @@ and a get_logger function to configure a logger with specific settings.
 """
 
 import re
-import os
+from os import environ
 import logging
 from typing import List, Tuple
 import mysql.connector
@@ -85,17 +85,18 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
 
     :return: MySQLConnection object.
     """
-    username = os.getenv('PERSONAL_DATA_DB_USERNAME', 'root')
-    password = os.getenv('PERSONAL_DATA_DB_PASSWORD', '')
-    host = os.getenv('PERSONAL_DATA_DB_HOST', 'localhost')
-    db_name = os.getenv('PERSONAL_DATA_DB_NAME')
+    username = environ.get('PERSONAL_DATA_DB_USERNAME', 'root')
+    password = environ.get('PERSONAL_DATA_DB_PASSWORD', '')
+    host = environ.get('PERSONAL_DATA_DB_HOST', 'localhost')
+    db_name = environ.get('PERSONAL_DATA_DB_NAME')
 
-    return mysql.connector.connect(
+    connect = mysql.connector.connection.MySQLConnection(
         user=username,
         password=password,
         host=host,
-        database=db_name
-    )
+        database=db_name)
+
+    return connect
 
 
 def main() -> None:
