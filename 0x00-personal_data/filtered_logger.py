@@ -10,6 +10,7 @@ from os import environ
 import logging
 from typing import List, Tuple
 import mysql.connector
+from mysql.connector.connection import MySQLConnection
 
 
 def filter_datum(fields: List[str], redaction: str,
