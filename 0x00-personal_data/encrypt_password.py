@@ -19,7 +19,7 @@ def hash_password(password: str) -> bytes:
     return hashed
 
 
-def is_valid(hashed: bytes, password: str) -> bool:
+def is_valid(hashed_password: bytes, password: str) -> bool:
     """
     Validate that the provided password matches the hashed password.
 
@@ -27,4 +27,8 @@ def is_valid(hashed: bytes, password: str) -> bool:
     :param password: The plain text password to validate.
     :return: True if the password matches the hashed password, False otherwise.
     """
-    return bcrypt.checkpw(password.encode(), hashed)
+    pwd_valid = False
+    encoded = password.encode()
+    if bcrypt.checkpw(encoded, hashed_password):
+        pwd_valid = True
+    return pwd_valid

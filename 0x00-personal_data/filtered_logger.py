@@ -81,38 +81,39 @@ def get_logger() -> logging.Logger:
 
 def get_db() -> mysql.connector.connection.MySQLConnection:
     """
-    Returns a MySQLConnection object for accessing Personal Data database
+    Connect to the MySQL database using credentials from environment variables.
 
-    Returns:
-        A MySQLConnection object using connection details from
-        environment variables
+    :return: MySQLConnection object.
     """
-    username = environ.get("PERSONAL_DATA_DB_USERNAME", "root")
-    password = environ.get("PERSONAL_DATA_DB_PASSWORD", "")
-    host = environ.get("PERSONAL_DATA_DB_HOST", "localhost")
-    db_name = environ.get("PERSONAL_DATA_DB_NAME")
+    username = environ.get('PERSONAL_DATA_DB_USERNAME', 'root')
+    password = environ.get('PERSONAL_DATA_DB_PASSWORD', '')
+    host = environ.get('PERSONAL_DATA_DB_HOST', 'localhost')
+    db_name = environ.get('PERSONAL_DATA_DB_NAME')
 
-    cnx = mysql.connector.connection.MySQLConnection(user=username,
-                                                     password=password,
-                                                     host=host,
-                                                     database=db_name)
-    return cnx
+    connect = mysql.connector.connection.MySQLConnection(
+        user=username,
+        password=password,
+        host=host,
+        database=db_name)
+
+    return connect
 
 
-def main() -> None:
+def main():
     """
     Main function that retrieves all rows from the users table and
     logs each row with sensitive fields obfuscated.
     """
     db = get_db()
-    cursor = db.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM users")
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users;")
+    field_names = [i[0] for i in cursor.description]
 
     logger = get_logger()
 
     for row in cursor:
-        message = "; ".join(f"{key}={value}" for key, value in row.items())
-        logger.info(message)
+        str_row = ''.join(f'{f}={str(r)}; ' for r, f in zip(row, field_names))
+        logger.info(str_row.strip())
 
     cursor.close()
     db.close()
