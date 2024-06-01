@@ -16,10 +16,15 @@ class Auth:
 
         :param path: The path to check.
         :param excluded_paths: List of paths that don't require authentication.
-        :return: False if authentication is not required, True otherwise.
+        :return: True if authentication is required, False otherwise.
         """
-        # For now, authentication is not required for any path
-        return False
+        if path is None or excluded_paths is None or len(excluded_paths) == 0:
+            return True
+
+        # Make paths slash tolerant
+        path = path.rstrip("/") + "/"
+
+        return path not in excluded_paths
 
     def authorization_header(self, request=None) -> str:
         """
