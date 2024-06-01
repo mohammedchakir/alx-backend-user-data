@@ -102,7 +102,7 @@ bob@dylan:~$
 
 
 
-#### [1. Error handler: Unauthorized](api)
+#### [1. Error handler: Unauthorized](api/v1)
 
 What the HTTP status code for a request unauthorized? `401` of course!
 
@@ -165,7 +165,7 @@ bob@dylan:~$
 
 
 
-#### [2. Error handler: Forbidden](api)
+#### [2. Error handler: Forbidden](api/v1)
 
 What the HTTP status code for a request where the user is authenticate but not allowed to access to a resource? `403` of course!
 
@@ -228,7 +228,7 @@ bob@dylan:~$
 
 
 
-#### [3. Auth class](api)
+#### [3. Auth class](api/v1/auth/auth.py)
 
 Now you will create a class to manage the API authentication.
 
@@ -270,7 +270,7 @@ bob@dylan:~$
 
 
 
-#### [4. Define which routes don't need authentication](api)
+#### [4. Define which routes don't need authentication](api/v1/auth/auth.py)
 
 Update the method `def require_auth(self, path: str, excluded_paths: List[str]) -> bool:` in `Auth` that returns `True` if the `path` is not in the list of strings `excluded_paths`:
 
@@ -314,7 +314,7 @@ bob@dylan:~$
 
 
 
-#### [5. Request validation!](api)
+#### [5. Request validation!](api/v1)
 
 Now you will validate all requests to secure the API:
 
@@ -379,7 +379,7 @@ bob@dylan:~$
 
 
 
-#### [6. Basic auth](api)
+#### [6. Basic auth](api/v1)
 
 Create a class `BasicAuth` that inherits from `Auth`. For the moment this class will be empty.
 
@@ -429,7 +429,7 @@ bob@dylan:~$
 
 
 
-#### [7. Basic - Base64 part](api)
+#### [7. Basic - Base64 part](api/v1/auth/basic_auth.py)
 
 Add the method `def extract_base64_authorization_header(self, authorization_header: str) -> str:` in the class `BasicAuth` that returns the Base64 part of the `Authorization` header for a Basic Authentication:
 
@@ -473,7 +473,7 @@ bob@dylan:~$
 
 
 
-#### [8. Basic - Base64 decode](api)
+#### [8. Basic - Base64 decode](api/v1/auth/basic_auth.py)
 
 Add the method `def decode_base64_authorization_header(self, base64_authorization_header: str) -> str:` in the class `BasicAuth` that returns the decoded value of a Base64 string `base64_authorization_header`:
 
@@ -514,7 +514,7 @@ bob@dylan:~$
 
 
 
-#### [9. Basic - User credentials](api)
+#### [9. Basic - User credentials](api/v1/auth/basic_auth.py)
 
 Add the method `def extract_user_credentials(self, decoded_base64_authorization_header: str) -> (str, str)` in the class `BasicAuth` that returns the user email and password from the Base64 decoded value.
 
@@ -555,7 +555,7 @@ bob@dylan:~$
 
 
 
-#### [10. Basic - User object](api)
+#### [10. Basic - User object](api/v1/auth/basic_auth.py)
 
 Add the method `def user_object_from_credentials(self, user_email: str, user_pwd: str) -> TypeVar('User'):` in the class `BasicAuth` that returns the `User` instance based on his email and password.
 
@@ -620,7 +620,7 @@ bob@dylan:~$
 
 
 
-#### [11. Basic - Overload current_user - and BOOM!](api)
+#### [11. Basic - Overload current_user - and BOOM!](api/v1/auth/basic_auth.py)
 
 Now, you have all pieces for having a complete Basic authentication.
 
