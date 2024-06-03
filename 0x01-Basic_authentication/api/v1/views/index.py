@@ -10,9 +10,7 @@ from api.v1.views import app_views
 def status() -> str:
     """
     GET /api/v1/status
-
     Return the status of the API.
-
     :return: JSON response with API status.
     """
     return jsonify({"status": "OK"})
@@ -22,9 +20,7 @@ def status() -> str:
 def stats() -> str:
     """
     GET /api/v1/stats
-
     Return the number of each object.
-
     :return: JSON response with object statistics.
     """
     from models.user import User
@@ -37,9 +33,7 @@ def stats() -> str:
 def unauthorized() -> str:
     """
     GET /api/v1/unauthorized
-
     Raise a 401 error to test the unauthorized error handler.
-
     :return: None
     """
     abort(401)
@@ -49,9 +43,7 @@ def unauthorized() -> str:
 def forbidden() -> str:
     """
     GET /api/v1/forbidden
-
     Raise a 403 error to test the forbidden error handler.
-
     :return: None
     """
     abort(403)

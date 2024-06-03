@@ -25,6 +25,9 @@ if auth_type:
 
 @app.before_request
 def before_request():
+    """
+    Handler for filtering each request before processing.
+    """
     if auth is None:
         return
 
