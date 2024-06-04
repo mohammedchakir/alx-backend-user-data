@@ -3,10 +3,11 @@
 This module contains the routes for session authentication.
 """
 
-from flask import Blueprint, request, jsonify, abort
+from flask import Blueprint, request, jsonify
 from models.user import User
-from api.v1.app import auth
 from os import getenv
+from api.v1.views import app_views
+
 
 app_views = Blueprint('app_views', __name__, url_prefix='/api/v1')
 
@@ -20,6 +21,7 @@ def auth_session_login():
         A JSON response containing the user information if login is successful.
         Otherwise, it returns an error message with appropriate status code.
     """
+    from api.v1.app import auth
     email = request.form.get('email')
     password = request.form.get('password')
 
