@@ -3,7 +3,7 @@
 This module contains the routes for session authentication.
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, abort
 from models.user import User
 from os import getenv
 from api.v1.views import app_views
@@ -42,3 +42,21 @@ def auth_session_login():
     response.set_cookie(cookie_name, session_id)
 
     return response
+
+
+@app_views.route('/auth_session/logout', methods=['DELETE'],
+                 strict_slashes=False)
+def auth_session_logout():
+    """
+    Handle the logout route for session authentication.
+
+    Returns:
+        A JSON response with an empty dictionary if logout is successful.
+        Otherwise, it returns a 404 error.
+    """
+    from api.v1.app import auth
+
+    if not auth.destroy_session(request):
+        abort(404)
+
+    return jsonify({}), 200
