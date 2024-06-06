@@ -37,15 +37,15 @@ def create_user():
     """
     Create a new User object
     """
-    from flask import request
     if not request.json:
-        abort(400, "Missing email")
+        abort(400, description="Missing email")
     if 'email' not in request.json:
-        abort(400, "Missing email")
+        abort(400, description="Missing email")
     if 'password' not in request.json:
-        abort(400, "Missing password")
+        abort(400, description="Missing password")
 
-    user = User(**request.json)
+    user_data = request.json
+    user = User(**user_data)
     user.save()
     return jsonify(user.to_dict()), 201
 
@@ -55,13 +55,17 @@ def update_user(user_id):
     """
     Update a User object
     """
-    from flask import request
     user = User.get(user_id)
     if user is None:
         abort(404)
-
-    for key, value in request.json.items():
-        setattr(user, key, value)
+    
+    if not request.json:
+        abort(400, description="Missing data")
+    
+    update_data = request.json
+    for key, value in update_data.items():
+        if key not in ['id', 'created_at', 'updated_at']:
+            setattr(user, key, value)
     user.save()
     return jsonify(user.to_dict())
 
