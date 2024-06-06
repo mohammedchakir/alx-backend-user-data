@@ -2,7 +2,7 @@
 """
 UserSession model module
 """
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 
@@ -16,7 +16,7 @@ class UserSession(Base):
     __tablename__ = 'user_sessions'
 
     id = Column(String(60), primary_key=True, nullable=False)
-    user_id = Column(String(60), ForeignKey('users.id'), nullable=False)
+    user_id = Column(String(60), nullable=False)
     session_id = Column(String(60), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -26,3 +26,4 @@ class UserSession(Base):
         """
         self.user_id = user_id
         self.session_id = session_id
+        self.created_at = datetime.utcnow()
