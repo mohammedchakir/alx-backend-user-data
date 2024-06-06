@@ -28,9 +28,15 @@ def view_one_user(user_id: str = None) -> str:
     if user_id is None:
         abort(404)
 
+    print(f"Requesting user ID: {user_id}")
+
     if user_id == 'me':
-        if request.current_user is None:
+        print("Handling 'me' case")
+        if not hasattr(
+                request, 'current_user') or request.current_user is None:
+            print("No current user found")
             abort(404)
+        print("Current user found")
         return jsonify(request.current_user.to_json())
 
     user = User.get(user_id)
@@ -46,8 +52,11 @@ def view_me_user() -> str:
       - Authenticated User object JSON represented
       - 404 if the User is not authenticated
     """
-    if request.current_user is None:
+    print("Requesting 'me' user")
+    if not hasattr(request, 'current_user') or request.current_user is None:
+        print("No current user found")
         abort(404)
+    print("Current user found")
     return jsonify(request.current_user.to_json())
 
 
