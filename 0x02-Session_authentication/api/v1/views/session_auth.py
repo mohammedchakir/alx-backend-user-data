@@ -5,7 +5,7 @@ This module contains the routes for session authentication.
 
 from flask import request, jsonify, abort
 from models.user import User
-from os import getenv
+import os
 from api.v1.views import app_views
 
 
@@ -18,30 +18,25 @@ def auth_session_login():
         A JSON response containing the user information if login is successful.
         Otherwise, it returns an error message with appropriate status code.
     """
-    from api.v1.app import auth
     email = request.form.get('email')
     password = request.form.get('password')
-
-    if not email:
+    if email is None or email == '':
         return jsonify({"error": "email missing"}), 400
-    if not password:
+    if password is None or password == '':
         return jsonify({"error": "password missing"}), 400
-
-    user = User.search({"email": email})
-    if not user or len(user) == 0:
+    users = User.search({"email": email})
+    if not users or users == []:
         return jsonify({"error": "no user found for this email"}), 404
+    for user in users:
+        if user.is_valid_password(password):
+            from api.v1.app import auth
+            session_id = auth.create_session(user.id)
+            response = jsonify(user.to_json())
+            session_name = os.getenv('SESSION_NAME')
+            response.set_cookie(session_name, session_id)
+            return response
 
-    user = user[0]
-    if not user.is_valid_password(password):
-        return jsonify({"error": "wrong password"}), 401
-
-    session_id = auth.create_session(user.id)
-    user_dict = user.to_json()
-    response = jsonify(user_dict)
-    cookie_name = getenv("SESSION_NAME")
-    response.set_cookie(cookie_name, session_id)
-
-    return response
+    return jsonify({"error": "wrong password"}), 401
 
 
 @app_views.route('/auth_session/logout', methods=['DELETE'],
