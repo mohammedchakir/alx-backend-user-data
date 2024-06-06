@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-""" Module of Users views
+"""
+Module of Users views.
 """
 from api.v1.views import app_views
 from flask import abort, jsonify, request
+from models import storage
 from models.user import User
 
 
@@ -12,7 +14,7 @@ def view_all_users() -> str:
     Return:
       - list of all User objects JSON represented
     """
-    all_users = [user.to_json() for user in User.all()]
+    all_users = [user.to_dict() for user in storage.all(User).values()]
     return jsonify(all_users)
 
 
@@ -29,13 +31,13 @@ def view_one_user(user_id: str = None) -> str:
         if not request.current_user:
             abort(404)
         else:
-            return jsonify(request.current_user.to_json())
+            return jsonify(request.current_user.to_dict())
     if user_id is None:
         abort(404)
-    user = User.get(user_id)
+    user = storage.get(User, user_id)
     if user is None:
         abort(404)
-    return jsonify(user.to_json())
+    return jsonify(user.to_dict())
 
 
 @app_views.route('/users/<user_id>', methods=['DELETE'], strict_slashes=False)
@@ -44,15 +46,16 @@ def delete_user(user_id: str = None) -> str:
     Path parameter:
       - User ID
     Return:
-      - empty JSON is the User has been correctly deleted
+      - empty JSON if the User has been correctly deleted
       - 404 if the User ID doesn't exist
     """
     if user_id is None:
         abort(404)
-    user = User.get(user_id)
+    user = storage.get(User, user_id)
     if user is None:
         abort(404)
-    user.remove()
+    user.delete()
+    storage.save()
     return jsonify({}), 200
 
 
@@ -68,30 +71,27 @@ def create_user() -> str:
       - User object JSON represented
       - 400 if can't create the new User
     """
-    rj = None
-    error_msg = None
     try:
         rj = request.get_json()
-    except Exception as e:
+    except Exception:
         rj = None
     if rj is None:
-        error_msg = "Wrong format"
-    if error_msg is None and rj.get("email", "") == "":
-        error_msg = "email missing"
-    if error_msg is None and rj.get("password", "") == "":
-        error_msg = "password missing"
-    if error_msg is None:
-        try:
-            user = User()
-            user.email = rj.get("email")
-            user.password = rj.get("password")
-            user.first_name = rj.get("first_name")
-            user.last_name = rj.get("last_name")
-            user.save()
-            return jsonify(user.to_json()), 201
-        except Exception as e:
-            error_msg = "Can't create User: {}".format(e)
-    return jsonify({'error': error_msg}), 400
+        return jsonify({'error': "Wrong format"}), 400
+    if not rj.get("email"):
+        return jsonify({'error': "email missing"}), 400
+    if not rj.get("password"):
+        return jsonify({'error': "password missing"}), 400
+
+    try:
+        user = User()
+        user.email = rj.get("email")
+        user.password = rj.get("password")
+        user.first_name = rj.get("first_name")
+        user.last_name = rj.get("last_name")
+        user.save()
+        return jsonify(user.to_dict()), 201
+    except Exception as e:
+        return jsonify({'error': f"Can't create User: {str(e)}"}), 400
 
 
 @app_views.route('/users/<user_id>', methods=['PUT'], strict_slashes=False)
@@ -109,19 +109,18 @@ def update_user(user_id: str = None) -> str:
     """
     if user_id is None:
         abort(404)
-    user = User.get(user_id)
+    user = storage.get(User, user_id)
     if user is None:
         abort(404)
-    rj = None
     try:
         rj = request.get_json()
-    except Exception as e:
+    except Exception:
         rj = None
     if rj is None:
         return jsonify({'error': "Wrong format"}), 400
-    if rj.get('first_name') is not None:
+    if 'first_name' in rj:
         user.first_name = rj.get('first_name')
-    if rj.get('last_name') is not None:
+    if 'last_name' in rj:
         user.last_name = rj.get('last_name')
     user.save()
-    return jsonify(user.to_json()), 200
+    return jsonify(user.to_dict()), 200
