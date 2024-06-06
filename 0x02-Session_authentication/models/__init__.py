@@ -48,6 +48,3 @@ class Storage:
         Query an object by filtering using keyword arguments
         """
         return self.__session.query(cls).filter_by(**kwargs).first()
-
-# Instantiate the storage object
-storage = Storage()
