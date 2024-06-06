@@ -4,7 +4,6 @@ Module of Users views.
 """
 from api.v1.views import app_views
 from flask import abort, jsonify, request
-from models import storage
 from models.user import User
 
 
@@ -14,7 +13,7 @@ def view_all_users() -> str:
     Return:
       - list of all User objects JSON represented
     """
-    all_users = [user.to_dict() for user in storage.all(User).values()]
+    all_users = [user.to_dict() for user in User.all()]
     return jsonify(all_users)
 
 
@@ -34,7 +33,7 @@ def view_one_user(user_id: str = None) -> str:
             return jsonify(request.current_user.to_dict())
     if user_id is None:
         abort(404)
-    user = storage.get(User, user_id)
+    user = User.get(user_id)
     if user is None:
         abort(404)
     return jsonify(user.to_dict())
@@ -51,11 +50,10 @@ def delete_user(user_id: str = None) -> str:
     """
     if user_id is None:
         abort(404)
-    user = storage.get(User, user_id)
+    user = User.get(user_id)
     if user is None:
         abort(404)
-    user.delete()
-    storage.save()
+    user.remove()
     return jsonify({}), 200
 
 
@@ -109,7 +107,7 @@ def update_user(user_id: str = None) -> str:
     """
     if user_id is None:
         abort(404)
-    user = storage.get(User, user_id)
+    user = User.get(user_id)
     if user is None:
         abort(404)
     try:
