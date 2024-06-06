@@ -9,7 +9,7 @@ from api.v1.auth.session_auth import SessionAuth
 
 class SessionExpAuth(SessionAuth):
     """SessionExpAuth class that adds session expiration"""
-    
+
     def __init__(self) -> None:
         """Initializes a new SessionExpAuth instance.
         """
