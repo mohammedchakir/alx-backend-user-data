@@ -1,22 +1,15 @@
 #!/usr/bin/env python3
+""" Module of Users views
 """
-This module contains the routes for session authentication.
-"""
-
-from flask import request, jsonify, abort
-from models.user import User
 import os
 from api.v1.views import app_views
+from models.user import User
+from flask import jsonify, request, abort
 
 
 @app_views.route('/auth_session/login', methods=['POST'], strict_slashes=False)
-def auth_session_login():
-    """
-    Handle the login route for session authentication.
-
-    Returns:
-        A JSON response containing the user information if login is successful.
-        Otherwise, it returns an error message with appropriate status code.
+def session_auth():
+    """_summary_
     """
     email = request.form.get('email')
     password = request.form.get('password')
@@ -31,26 +24,20 @@ def auth_session_login():
         if user.is_valid_password(password):
             from api.v1.app import auth
             session_id = auth.create_session(user.id)
-            response = jsonify(user.to_json())
+            resp = jsonify(user.to_json())
             session_name = os.getenv('SESSION_NAME')
-            response.set_cookie(session_name, session_id)
-            return response
-
+            resp.set_cookie(session_name, session_id)
+            return resp
     return jsonify({"error": "wrong password"}), 401
 
 
-@app_views.route('/auth_session/logout', methods=['DELETE'],
-                 strict_slashes=False)
-def auth_session_logout():
+@app_views.route('/auth_session/logout',
+                 methods=['DELETE'], strict_slashes=False)
+def logout():
     """
-    Handle the logout route for session authentication.
-
-    Returns:
-        A JSON response with an empty dictionary if logout is successful.
-        Otherwise, it returns a 404 error.
+    for logging out user
     """
     from api.v1.app import auth
-
     if auth.destroy_session(request):
         return jsonify({}), 200
     abort(404)
