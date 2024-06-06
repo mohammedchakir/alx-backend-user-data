@@ -12,7 +12,7 @@ def view_all_users() -> str:
     Return:
       - list of all User objects JSON represented
     """
-    all_users = [user.to_dict() for user in User.all()]
+    all_users = [user.to_json() for user in User.all()]
     return jsonify(all_users)
 
 
@@ -27,16 +27,15 @@ def view_one_user(user_id: str = None) -> str:
     """
     if user_id is None:
         abort(404)
-
-    if user_id == 'me':
+    if user_id == "me":
         if request.current_user is None:
             abort(404)
-        return jsonify(request.current_user.to_dict())
-
+        user = request.current_user
+        return jsonify(user.to_json())
     user = User.get(user_id)
     if user is None:
         abort(404)
-    return jsonify(user.to_dict())
+    return jsonify(user.to_json())
 
 
 @app_views.route('/users/<user_id>', methods=['DELETE'], strict_slashes=False)
@@ -53,7 +52,7 @@ def delete_user(user_id: str = None) -> str:
     user = User.get(user_id)
     if user is None:
         abort(404)
-    user.delete()
+    user.remove()
     return jsonify({}), 200
 
 
@@ -69,28 +68,30 @@ def create_user() -> str:
       - User object JSON represented
       - 400 if can't create the new User
     """
+    rj = None
+    error_msg = None
     try:
         rj = request.get_json()
-    except Exception:
+    except Exception as e:
         rj = None
     if rj is None:
-        return jsonify({'error': 'Wrong format'}), 400
-
-    if not rj.get('email'):
-        return jsonify({'error': 'email missing'}), 400
-    if not rj.get('password'):
-        return jsonify({'error': 'password missing'}), 400
-
-    try:
-        user = User()
-        user.email = rj.get('email')
-        user.password = rj.get('password')
-        user.first_name = rj.get('first_name')
-        user.last_name = rj.get('last_name')
-        user.save()
-        return jsonify(user.to_dict()), 201
-    except Exception as e:
-        return jsonify({'error': f"Can't create User: {e}"}), 400
+        error_msg = "Wrong format"
+    if error_msg is None and rj.get("email", "") == "":
+        error_msg = "email missing"
+    if error_msg is None and rj.get("password", "") == "":
+        error_msg = "password missing"
+    if error_msg is None:
+        try:
+            user = User()
+            user.email = rj.get("email")
+            user.password = rj.get("password")
+            user.first_name = rj.get("first_name")
+            user.last_name = rj.get("last_name")
+            user.save()
+            return jsonify(user.to_json()), 201
+        except Exception as e:
+            error_msg = "Can't create User: {}".format(e)
+    return jsonify({'error': error_msg}), 400
 
 
 @app_views.route('/users/<user_id>', methods=['PUT'], strict_slashes=False)
@@ -111,17 +112,16 @@ def update_user(user_id: str = None) -> str:
     user = User.get(user_id)
     if user is None:
         abort(404)
+    rj = None
     try:
         rj = request.get_json()
-    except Exception:
+    except Exception as e:
         rj = None
     if rj is None:
-        return jsonify({'error': 'Wrong format'}), 400
-
-    if 'first_name' in rj:
+        return jsonify({'error': "Wrong format"}), 400
+    if rj.get('first_name') is not None:
         user.first_name = rj.get('first_name')
-    if 'last_name' in rj:
+    if rj.get('last_name') is not None:
         user.last_name = rj.get('last_name')
-
     user.save()
-    return jsonify(user.to_dict()), 200
+    return jsonify(user.to_json()), 200
