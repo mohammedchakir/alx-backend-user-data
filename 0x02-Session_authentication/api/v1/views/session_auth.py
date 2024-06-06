@@ -2,17 +2,14 @@
 """ Module of Users views
 """
 import os
-from flask import jsonify, request
 from api.v1.views import app_views
 from models.user import User
+from flask import jsonify, request, abort
 
 
 @app_views.route('/auth_session/login', methods=['POST'], strict_slashes=False)
-def auth_session():
-    """
-    Handle user login
-    Return:
-        dictionary representation of user if found else error message
+def session_auth():
+    """_summary_
     """
     email = request.form.get('email')
     password = request.form.get('password')
@@ -34,11 +31,11 @@ def auth_session():
     return jsonify({"error": "wrong password"}), 401
 
 
-@app_views.route('/auth_session/logout', methods=['DELETE'],
-                 strict_slashes=False)
-def handle_logout():
+@app_views.route('/auth_session/logout',
+                 methods=['DELETE'], strict_slashes=False)
+def logout():
     """
-    Handle user logout
+    for logging out user
     """
     from api.v1.app import auth
     if auth.destroy_session(request):
