@@ -4,6 +4,8 @@ Authentication module for the API.
 """
 import os
 from flask import request
+import base64
+from models import User
 
 
 class Auth:
@@ -22,7 +24,6 @@ class Auth:
         if path is None or excluded_paths is None or len(excluded_paths) == 0:
             return True
 
-        # Make paths slash tolerant
         path = path.rstrip("/") + "/"
 
         return path not in excluded_paths
@@ -45,7 +46,18 @@ class Auth:
         :param request: The Flask request object.
         :return: None for now, as this method will be implemented later.
         """
-        # For now, return None
+        if request is None:
+            return None
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Basic '):
+            return None
+
+        auth_decoded = base64.b64decode(auth_header[6:]).decode('utf-8')
+        email, password = auth_decoded.split(':', 1)
+
+        user = User.find_by_email(email)
+        if user and user.verify_password(password):
+            return user
         return None
 
     def session_cookie(self, request=None):
