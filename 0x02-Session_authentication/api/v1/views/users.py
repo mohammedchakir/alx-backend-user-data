@@ -9,12 +9,6 @@ from api.v1.auth.auth import Auth
 auth = Auth()
 
 
-@app_views.before_request
-def before_request():
-    """ Handle before any request to set current user """
-    request.current_user = auth.current_user(request)
-
-
 @app_views.route('/users', methods=['GET'], strict_slashes=False)
 def view_all_users() -> str:
     """ GET /api/v1/users
@@ -37,10 +31,15 @@ def view_one_user(user_id: str = None) -> str:
     if user_id is None:
         abort(404)
 
+    print(f"Requesting user ID: {user_id}")
+
     if user_id == 'me':
+        print("Handling 'me' case")
         if not hasattr(
                 request, 'current_user') or request.current_user is None:
+            print("No current user found")
             abort(404)
+        print("Current user found")
         return jsonify(request.current_user.to_json())
 
     user = User.get(user_id)
@@ -56,8 +55,11 @@ def view_me_user() -> str:
       - Authenticated User object JSON represented
       - 404 if the User is not authenticated
     """
+    print("Requesting 'me' user")
     if not hasattr(request, 'current_user') or request.current_user is None:
+        print("No current user found")
         abort(404)
+    print("Current user found")
     return jsonify(request.current_user.to_json())
 
 
