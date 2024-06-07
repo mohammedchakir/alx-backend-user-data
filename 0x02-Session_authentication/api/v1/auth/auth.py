@@ -4,8 +4,6 @@ Authentication module for the API.
 """
 import os
 from flask import request
-import base64
-from models import User
 
 
 class Auth:
