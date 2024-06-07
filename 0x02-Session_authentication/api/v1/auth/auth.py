@@ -44,7 +44,7 @@ class Auth:
         :param request: The Flask request object.
         :return: None for now, as this method will be implemented later.
         """
-        
+
         return None
 
     def session_cookie(self, request=None):
