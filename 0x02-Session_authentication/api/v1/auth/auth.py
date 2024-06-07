@@ -4,6 +4,8 @@ Authentication module for the API.
 """
 import os
 from flask import request
+import base64
+from models import User
 
 
 class Auth:
@@ -44,7 +46,36 @@ class Auth:
         :param request: The Flask request object.
         :return: None for now, as this method will be implemented later.
         """
-        return None
+        if request is None:
+            return None
+
+        auth_header = self.authorization_header(request)
+        if auth_header is None:
+            print("No Authorization header found")
+            return None
+
+        if not auth_header.startswith("Basic "):
+            print("Authorization header does not start with 'Basic '")
+            return None
+
+        encoded_credentials = auth_header.split(' ')[1]
+        try:
+            decoded_credentials = base64.b64decode(
+                    encoded_credentials).decode('utf-8')
+            email, password = decoded_credentials.split(':', 1)
+        except (ValueError, base64.binascii.Error):
+            print("Failed to decode credentials")
+            return None
+
+        user = User.find_by_email(email)
+        if user is None:
+            print(f"No user found with email: {email}")
+            return None
+        if not user.verify_password(password):
+            print("Password verification failed")
+            return None
+
+        return user
 
     def session_cookie(self, request=None):
         """
