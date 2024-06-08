@@ -3,7 +3,7 @@
 This module contains the routes for session authentication.
 """
 
-from flask import request, jsonify, abort, make_response
+from flask import request, jsonify, abort
 from models.user import User
 import os
 from api.v1.views import app_views
@@ -37,6 +37,22 @@ def login():
     response.set_cookie(session_name, session_id)
 
     return response
+
+
+@app_views.route('/users/me', methods=['GET'], strict_slashes=False)
+def get_user():
+    """ GET /api/v1/users/me
+    """
+    from api.v1.app import auth
+    user_id = auth.get_user_id_from_request(request)
+    if user_id is None:
+        abort(404)
+    
+    user = User.get(user_id)
+    if user is None:
+        abort(404)
+
+    return jsonify(user.to_json()), 200
 
 
 @app_views.route('/auth_session/logout', methods=['DELETE'],
