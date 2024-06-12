@@ -8,6 +8,7 @@ import bcrypt
 from db import DB
 from user import User
 from typing import Union
+from sqlalchemy.orm.exc import NoResultFound
 
 
 def _hash_password(password: str) -> bytes:
@@ -30,7 +31,7 @@ class Auth:
         """Initializes a new Auth instance."""
         self._db = DB()
 
-    def register_user(self, email: str, password: str) -> User:
+    def register_user(self, email: str, password: str) -> Union[None, User]:
         """Registers a new user.
         Args:
             email (str): The email of the user.
