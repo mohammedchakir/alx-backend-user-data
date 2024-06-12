@@ -42,10 +42,11 @@ class DB:
         Returns:
             User: The created user object.
         """
-        user = User(email=email, hashed_password=hashed_password)
-        self._session.add(user)
+        new_user = User(email=email, hashed_password=hashed_password)
+        # add new user and commit to database
+        self._session.add(new_user)
         self._session.commit()
-        return user
+        return new_user
 
     def find_user_by(self, **kwargs) -> User:
         """Finds a user by arbitrary keyword arguments.
@@ -57,10 +58,10 @@ class DB:
             NoResultFound: If no user is found.
             InvalidRequestError: If query arguments are invalid.
         """
-        try:
-            user = self._session.query(User).filter_by(**kwargs).one()
-            return user
-        except NoResultFound:
-            raise NoResultFound("No user found with the specified criteria")
-        except InvalidRequestError:
-            raise InvalidRequestError("Invalid query arguments")
+        if not kwargs:
+            raise InvalidRequestError
+
+        user = self._session.query(User).filter_by(**kwargs).first()
+        if not user:
+            raise NoResultFound
+        return user
