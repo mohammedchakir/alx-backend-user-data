@@ -5,10 +5,10 @@ Auth module
 """
 
 import bcrypt
+import uuid
 from db import DB
 from user import User
 from typing import Union
-from uuid import uuid4
 from sqlalchemy.orm.exc import NoResultFound
 
 
@@ -22,12 +22,13 @@ def _hash_password(password: str) -> str:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
 
+
 def _generate_uuid() -> str:
+    """Generates a new UUID.
+    Returns:
+        str: The string representation of the UUID.
     """
-    Generates a new UUID.
-    """
-    id = uuid4()
-    return str(id)
+    return str(uuid.uuid4())
 
 
 class Auth:
