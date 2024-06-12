@@ -8,6 +8,7 @@ import bcrypt
 from db import DB
 from user import User
 from typing import Union
+from uuid import uuid4
 from sqlalchemy.orm.exc import NoResultFound
 
 
@@ -21,6 +22,14 @@ def _hash_password(password: str) -> bytes:
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed_password
+
+
+def _generate_uuid() -> str:
+    """
+    Generates a new UUID.
+    """
+    id = uuid4()
+    return str(id)
 
 
 class Auth:
@@ -43,8 +52,8 @@ class Auth:
         """
         try:
             self._db.find_user_by(email=email)
-            raise ValueError(f"User {email} already exists")
         except NoResultFound:
-            hashed_password = _hash_password(password)
-            user = self._db.add_user(email, hashed_password)
-            return user
+            return self._db.add_user(email, _hash_password(password))
+
+        else:
+            raise ValueError('User {} already exists'.format(email))
