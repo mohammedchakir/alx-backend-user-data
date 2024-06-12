@@ -12,16 +12,14 @@ from uuid import uuid4
 from sqlalchemy.orm.exc import NoResultFound
 
 
-def _hash_password(password: str) -> bytes:
+def _hash_password(password: str) -> str:
     """Hashes a password using bcrypt.
     Args:
         password (str): The password to hash.
     Returns:
         bytes: The salted hash of the password.
     """
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
 
 def _generate_uuid() -> str:
@@ -36,7 +34,7 @@ class Auth:
     """Auth class to interact with the authentication database.
     """
 
-    def __init__(self) -> None:
+    def __init__(self):
         """Initializes a new Auth instance."""
         self._db = DB()
 
