@@ -46,19 +46,29 @@ class Auth:
         """
         self._db = DB()
 
-    def register_user(self, email: str, password: str) -> Union[None, User]:
-        """_summary_
+    def register_user(self, email: str, password: str) -> User:
+        """Register a new user with email and password.
+
+        Args:
+            email (str): The email of the user.
+            password (str): The password of the user.
+
+        Returns:
+            User: The newly created user object.
+
+        Raises:
+            ValueError: If a user with the provided email already exists.
         """
         try:
-            # find the user with the given email
+            # Check if user with given email already exists
             self._db.find_user_by(email=email)
+            # If no exception, user exists
+            raise ValueError(f"User {email} already exists")
         except NoResultFound:
-            # add user to database
-            return self._db.add_user(email, _hash_password(password))
-
-        else:
-            # if user already exists, throw error
-            raise ValueError('User {} already exists'.format(email))
+            # If no user found, proceed to create a new user
+            hashed_password = _hash_password(password)
+            new_user = self._db.add_user(email, hashed_password)
+            return new_user
 
     def valid_login(self, email: str, password: str) -> bool:
         """_summary_
