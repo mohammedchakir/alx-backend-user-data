@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""_summary_
-"""
-
+"""Auth module"""
 
 import bcrypt
 from db import DB
@@ -13,49 +11,40 @@ from typing import Union
 
 
 def _hash_password(password: str) -> str:
-    """_summary_
-
+    """Hashes a password using bcrypt.
     Args:
-        password (str): _description_
-
+        password (str): The password to hash.
     Returns:
-        bytes: _description_
+        bytes: The salted hash of the password.
     """
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
 
 def _generate_uuid() -> str:
-    """_summary_
-
-    Raises:
-        ValueError: _description_
-
+    """Generates a new UUID.
     Returns:
-        str: _description_
+        str: The string representation of the UUID.
     """
     id = uuid4()
     return str(id)
 
 
 class Auth:
-    """Auth class to interact with the authentication database.
+    """
+    Auth class to interact with the authentication database.
     """
 
     def __init__(self):
-        """_summary_
-        """
+        """Initializes a new Auth instance."""
         self._db = DB()
 
     def register_user(self, email: str, password: str) -> User:
         """Register a new user with email and password.
-
         Args:
             email (str): The email of the user.
             password (str): The password of the user.
-
         Returns:
             User: The newly created user object.
-
         Raises:
             ValueError: If a user with the provided email already exists.
         """
@@ -71,14 +60,12 @@ class Auth:
             return new_user
 
     def valid_login(self, email: str, password: str) -> bool:
-        """_summary_
-
+        """Validates login credentials.
         Args:
-            email (str): _description_
-            password (str): _description_
-
+            email (str): The email of the user.
+            password (str): The password of the user.
         Returns:
-            Boolean: _description_
+            bool: True if the credentials are valid, False otherwise.
         """
         try:
             # find the user with the given email
@@ -89,13 +76,12 @@ class Auth:
         return bcrypt.checkpw(password.encode('utf-8'), user.hashed_password)
 
     def create_session(self, email: str) -> str:
-        """_summary_
-
+        """Creates a session for the user.
         Args:
-            email (str): _description_
-
+            email (str): The email of the user.
         Returns:
-            str: _description_
+            Union[str, None]: The session ID as a string,
+            or None if the user is not found.
         """
         try:
             user = self._db.find_user_by(email=email)
@@ -106,10 +92,11 @@ class Auth:
             return user.session_id
 
     def get_user_from_session_id(self, session_id: str) -> User:
-        """_summary_
-
+        """Retrieve user based on session ID.
         Args:
-            session_id (_type_): _description_
+            session_id (str): The session ID to retrieve the user.
+        Returns:
+            User: The corresponding user object if found, else None.
         """
         if session_id is None:
             return None
@@ -121,11 +108,7 @@ class Auth:
             return user
 
     def destroy_session(self, user_id: str) -> None:
-        """_summary_
-
-        Args:
-            user_id (str): _description_
-        """
+        """function for destroy session"""
         try:
             user = self._db.find_user_by(id=user_id)
         except NoResultFound:
@@ -135,13 +118,12 @@ class Auth:
             return None
 
     def get_reset_password_token(self, email: str) -> str:
-        """_summary_
-
+        """Get the reset password token for a user.
         Args:
-            email (str): _description_
+            email (str): The email of the user.
 
         Returns:
-            str: _description_
+            str: The reset password token generated for the user.
         """
         try:
             user = self._db.find_user_by(email=email)
@@ -152,11 +134,14 @@ class Auth:
             return user.reset_token
 
     def update_password(self, reset_token: str, password: str) -> None:
-        """_summary_
-
+        """Updates the password for a user.
         Args:
-            reset_token (str): _description_
-            password (str): _description_
+            reset_token (str): The reset token associated with the user.
+            password (str): The new password to be set.
+        Raises:
+            ValueError: If no user is found with the given reset token.
+        Returns:
+            None
         """
         try:
             user = self._db.find_user_by(reset_token=reset_token)
